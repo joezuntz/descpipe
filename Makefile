@@ -1,22 +1,25 @@
 STAGES=treecorr
+
 OWNER=joezuntz
 BASENAME=desc-pipe
 VERSION=1.0
 
 
+LOGS := $(STAGES:%=build/%.log) build/base.log
+
 .DEFAULT_GOAL := $(STAGES)
 
-.PHONY: base $(STAGES)
+.PHONY: base $(STAGES) clean
 
-base: base/docker-build.log
+base: build/base.log
 
-$(STAGES): % :  %/docker-build.log
+$(STAGES): % :  build/%.log
 
-base/docker-build.log: base/Dockerfile
-	@echo [triggered by changes in $?]
-	cd base; docker build -t ${OWNER}/${BASENAME}-base:${VERSION} . 2>&1 | tee docker-build.log
+build/base.log: base/Dockerfile
+	docker build -t ${OWNER}/${BASENAME}-base:${VERSION} ./base 2>&1 | tee $@
 
-%/docker-build.log :  %/Dockerfile %/run.sh base/docker-build.log
-	@echo [$* triggered by changes in $?]
-	cd $*; docker build -t ${OWNER}/${BASENAME}-$*:${VERSION} . 2>&1 | tee docker-build.log
+build/%.log :  %/Dockerfile %/run.sh build/base.log
+	docker build -t ${OWNER}/${BASENAME}-$*:${VERSION} ./$* 2>&1 | tee $@
 
+clean:
+	rm -f $(LOGS)
