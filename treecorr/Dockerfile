@@ -12,7 +12,3 @@ RUN bash -lc "pip install TreeCorr"
 # Must always end with these
 USER vagrant
 COPY run.sh /opt/desc/run.sh
-
-
-
-
