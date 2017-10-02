@@ -1,0 +1,19 @@
+# photoz:
+#   depends_on: []
+#   config: [config.yaml]
+#   inputs: [catalog.fits]
+#   outputs: [photoz-catalog.fits]
+
+# tomography:
+#   depends_on: [photoz]
+#   inputs: [photoz-catalog.fits]
+#   outputs: [tomographic-catalog.fits]
+
+
+treecorr2d:
+  # Parent stages
+  depends_on: []
+  # Paths to key directories
+  config: ./config
+  input: ./input
+  output: ./output

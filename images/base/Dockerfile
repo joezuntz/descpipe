@@ -5,8 +5,8 @@ MAINTAINER joezuntz@googlemail.com
 
 USER root
 RUN mkdir /opt/desc
-COPY run.sh /opt/desc/run.sh
-CMD /opt/desc/run.sh
+COPY run.py /opt/desc/run.py
+CMD bash -lc /opt/desc/run.py
 
 ADD dot-bashprofile /root/.bash_profile
 ADD dot-bashrc /root/.bashrc
@@ -19,3 +19,4 @@ ADD dot-bashrc /home/vagrant/.bashrc
 ENV DESC_INPUT=/opt/input
 ENV DESC_OUTPUT=/opt/output
 ENV DESC_CONFIG=/opt/config
+ENV PYTHONPATH="/opt/desc:${PYTHONPATH}"
