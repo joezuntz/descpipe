@@ -2,6 +2,8 @@
 
 ## Status
 
+Requires Python3
+
 Generates a test.sh script that runs a one-step pipeline (catalog->2pt 2D) using packaged Dockerfiles.
 Requires a catalog input file to run.
 
