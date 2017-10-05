@@ -1,0 +1,32 @@
+file_name: file.dat
+
+ra_units: degrees
+dec_units: degrees
+
+ra_col: ra
+dec_col: dec
+g1_col: e1
+g2_col: e2
+w_col: weight
+
+
+min_sep: 1.
+max_sep: 300.
+bin_size: 0.10
+
+sep_units: arcmin
+
+
+gg_file_name: gg.out
+
+# verbose specifies how much progress output the code should emit.
+# 0 = no output unless there is an error
+# 1 = warnings (This is the default if not specified)
+# 2 = progress information
+# 3 = extra debugging output
+verbose: 2
+
+# num_threads = the number of threads to use.
+# The default is to let OpenMP determine an appropriate number of threads automatically.
+# Usually this matches the number of cores your system has.
+#num_threads: 1
