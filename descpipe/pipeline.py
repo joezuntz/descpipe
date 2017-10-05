@@ -96,17 +96,19 @@ class Pipeline:
         # Generate a Pegasus DAG
         pass
 
-    def config_dir(self):
-        return self.info['config']
 
 
 
 
 class Translator:
-    def __init__(self, info):
-        self.info = info
+    def __init__(self, pipeline):
+        self.pipeline = pipeline
+        self.info = pipeline.cfg['runtime']
 
 class LocalDockerTranslator(Translator):
+
+    def config_dir(self):
+        return self.info['config']
 
     def working_dir(self):
         return self.info['working']        
@@ -122,7 +124,7 @@ class LocalDockerTranslator(Translator):
         return input_dir, output_dir, config_dir
 
     def _local_input_path(self, input_tag):
-        path = self.info['inputs'].get(input_tag)
+        path = self.pipeline.info['inputs'].get(input_tag)
 
         if path is None:
             path = os.path.join(self.data_dir(), input_tag)
@@ -143,7 +145,7 @@ class LocalDockerTranslator(Translator):
 
         lines.append("# Hard link configuration files")
         for config_tag, config_filename in stage_class.config.items():
-            filename = self.cfg[stage_name]['config'][config_tag]
+            filename = self.pipeline.cfg[stage_name]['config'][config_tag]
             path = os.path.join(self.config_dir(), filename)
             task_path = task_path = os.path.join(config_dir, config_filename)
             lines.append("ln {} {}".format(path, task_path))
@@ -155,7 +157,7 @@ class LocalDockerTranslator(Translator):
             task_path = os.path.join(input_dir, task_filename)
             lines.append("ln {} {}".format(path, task_path))
 
-        image = self.image_name(stage_name)
+        image = self.pipeline.image_name(stage_name)
         input_mount = "-v {}:/opt/input".format(os.path.abspath(input_dir))
         output_mount = "-v {}:/opt/output".format(os.path.abspath(output_dir))
         config_mount = "-v {}:/opt/config".format(os.path.abspath(config_dir))
@@ -175,14 +177,14 @@ class LocalDockerTranslator(Translator):
 
 
     def generate(self, script_name):
-        self.check_local_inputs()
+        self.pipeline.check_local_inputs()
         # Generate a bash script to run the pipeline locally under docker
         # Assume stages all built already
         lines = ['#!/bin/sh']
 
         lines.append("mkdir -p {}".format(self.data_dir()))
 
-        for stage_name, stage_class in self.stages.items():
+        for stage_name, stage_class in self.pipeline.stages.items():
             lines += self.script_for_stage(stage_name, stage_class)
 
         lines.append("\n")
