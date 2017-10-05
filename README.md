@@ -1,5 +1,10 @@
 # Prototype / Proof-of-concept of Docker-based pipeline
 
+## Status
+
+Generates a test.sh script that runs a one-step pipeline (catalog->2pt 2D) using packaged Dockerfiles.
+Requires a catalog input file to run.
+
 ## Some issues we face in pipeline design
 
 Heterogenous machines & architectures
