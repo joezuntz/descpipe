@@ -1,3 +1,42 @@
+# Details of the overall pipeline
+pipeline:
+  # Location(s) where the code for the building images is kept.
+  # Needed because we need to examine the stages in the pipeline
+  images: [./images]
+  stages:   [treecorr2d]
+  # Working directory:
+  owner:    joezuntz
+  basename: desc-pipe
+  version:  1.0
+  #Overall inputs to the whole pipeline.
+  #Keys are as used by the modules.
+  inputs:
+    shear_catalog.fits: ./test/inputs/my-input-catalog.fits
+
+
+runtime:
+  working:   ./work
+  #Place to read configuration files for each stage
+  config:   ./test/config
+  #Place to copy the outputs to:
+  output:   ./test/output
+  # Pipeline details (determines the Docker image name)
+
+
+
+treecorr2d:
+  # modules that must be run before this one
+  depends_on: []
+  config:
+    # this should be copied from the config dir specified in pipeline to the 
+    # path that "config" refers to in the stage
+    config: treecorr-config.yaml  
+  # something like this?
+  cores: 1
+  nodes: 1
+  time: 5
+
+
 # photoz:
 #   depends_on: []
 #   config: [config.yaml]
@@ -8,12 +47,3 @@
 #   depends_on: [photoz]
 #   inputs: [photoz-catalog.fits]
 #   outputs: [tomographic-catalog.fits]
-
-
-treecorr2d:
-  # Parent stages
-  depends_on: []
-  # Paths to key directories
-  config: ./config
-  input: ./input
-  output: ./output

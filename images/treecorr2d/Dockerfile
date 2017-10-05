@@ -1,4 +1,4 @@
-FROM joezuntz/desc-pipe-test:1.0
+FROM joezuntz/desc-pipe-base:1.0
 MAINTAINER joezuntz@googlemail.com
 
 #Enable root mode
@@ -12,3 +12,4 @@ RUN bash -lc "pip install TreeCorr"
 # Must always end with these
 USER vagrant
 COPY run.py /opt/desc/run.py
+ADD descpipe /opt/desc/descpipe
