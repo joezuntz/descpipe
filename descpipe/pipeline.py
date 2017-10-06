@@ -1,15 +1,11 @@
 import yaml
 import importlib.util
 import os
+from .errors import PipelineError
 
 special_keys = ['pipeline', 'runtime']
 
 
-class PipelineError(Exception):
-    pass
-
-class InputError(PipelineError):
-    pass
 
 class Pipeline:
 
@@ -36,7 +32,7 @@ class Pipeline:
                 path = run_path
                 break
         else:
-            raise ValueError("""No Stage called {} was found - needs to be in one 
+            raise PipelineError("""No Stage called {} was found - needs to be in one 
                 of the images directories and contain Dockerfile, run.py""".format(name))
 
         spec = importlib.util.spec_from_file_location(name, path)

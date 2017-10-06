@@ -1,7 +1,7 @@
 import os
 from .. import utils
 from .launcher import Launcher
-
+from ..errors import InputError
 
 
 class LocalDockerLauncher(Launcher):
@@ -50,7 +50,7 @@ fi
         config_dir = os.path.join(stage_dir, 'config')
         return input_dir, output_dir, config_dir
 
-    def _local_input_path(self, input_tag):
+    def _input_path(self, input_tag):
         path = self.info['inputs'].get(input_tag)
 
         if path is None:
@@ -83,7 +83,7 @@ fi
 
         lines.append("# Hard link input files either from pipeline inputs or other module outputs")
         for input_tag, task_filename in stage_class.inputs.items():
-            path = self._local_input_path(input_tag)
+            path = self._input_path(input_tag)
             task_path = os.path.join(input_dir, task_filename)
             lines.append("ln {} {}".format(path, task_path))
 
@@ -103,6 +103,7 @@ fi
             task_path = os.path.join(output_dir, output_filename)
             path = os.path.join(self._data_dir(), output_tag)
             lines.append("ln {} {}".format(task_path, path))
+
 
         return lines
 

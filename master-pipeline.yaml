@@ -20,9 +20,10 @@ runtime:
   output:   ./test/output
   # Pipeline details (determines the Docker image name)
   inputs:
-    shear_catalog.fits: ./test/inputs/my-input-catalog.fits
+    shear_catalog.fits: ./test/inputs/desc-pipe-test-catalog.fits
 
 
+# Stages in the pipeline
 
 treecorr2d:
   # modules that must be run before this one
@@ -34,7 +35,7 @@ treecorr2d:
   # something like this?
   cores: 32
   nodes: 1
-  time: 5
+  minutes: 5
 
 
 # photoz:
