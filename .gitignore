@@ -2,3 +2,4 @@ images/build/*.log
 
 *__pycache__
 *.pyc
+images/
