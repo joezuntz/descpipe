@@ -4,8 +4,6 @@ import argparse
 
 
 class Stage:
-    __metaclass__=type
-
     def __init__(self):
         self.config_dir = os.environ['DESC_CONFIG']
         self.input_dir = os.environ['DESC_INPUT']
@@ -28,4 +26,3 @@ class Stage:
         filename = self.outputs[name]
         return os.path.join(self.output_dir, filename)
 
-    

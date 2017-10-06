@@ -20,3 +20,6 @@ ENV DESC_INPUT=/opt/input
 ENV DESC_OUTPUT=/opt/output
 ENV DESC_CONFIG=/opt/config
 ENV PYTHONPATH="/opt/desc:${PYTHONPATH}"
+
+
+ADD descpipe /opt/desc/descpipe

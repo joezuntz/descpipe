@@ -10,8 +10,6 @@ pipeline:
   version:  1.0
   #Overall inputs to the whole pipeline.
   #Keys are as used by the modules.
-  inputs:
-    shear_catalog.fits: ./test/inputs/my-input-catalog.fits
 
 
 runtime:
@@ -21,6 +19,8 @@ runtime:
   #Place to copy the outputs to:
   output:   ./test/output
   # Pipeline details (determines the Docker image name)
+  inputs:
+    shear_catalog.fits: ./test/inputs/my-input-catalog.fits
 
 
 
@@ -32,7 +32,7 @@ treecorr2d:
     # path that "config" refers to in the stage
     config: treecorr-config.yaml  
   # something like this?
-  cores: 1
+  cores: 32
   nodes: 1
   time: 5
 

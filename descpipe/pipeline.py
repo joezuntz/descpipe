@@ -1,7 +1,6 @@
 import yaml
 import importlib.util
 import os
-from . import utils
 
 special_keys = ['pipeline', 'runtime']
 
@@ -46,7 +45,7 @@ class Pipeline:
         return module.Stage
 
 
-    def pipeline_inputs(self):
+    def inputs(self):
         "Return a set of all input tags required by the pipeline and not generated inside it."
         pipeline_inputs = set()
         # Find all the inputs expected by the pipeline
@@ -58,17 +57,6 @@ class Pipeline:
 
         return pipeline_inputs
 
-
-    def check_local_inputs(self):
-        inputs = self.pipeline_inputs()
-        for tag in inputs:
-            path = self.info['inputs'].get(tag)
-            if path is None:
-                raise PipelineError("No path for input {} is specified in the pipeline file".format(tag))
-            if not os.path.exists(path):
-                raise InputError("Nothing found at specified input path: {}".format(path))
-            if not os.path.isfile(path):
-                raise InputError("Input path is a directory (not allowed): {}".format(path))
 
 
 
@@ -86,109 +74,7 @@ class Pipeline:
         return '{}/{}-{}:{}'.format(self.owner,self.basename, name, self.version)
 
 
-    def _sequence(self):
+    def serial_sequence(self):
         # for serial systems, choose an ordering for the pipeline
         # TODO: order this
-        return self.stages
-
-
-    def to_pegasus(self):
-        # Generate a Pegasus DAG
-        pass
-
-
-
-
-
-class Translator:
-    def __init__(self, pipeline):
-        self.pipeline = pipeline
-        self.info = pipeline.cfg['runtime']
-
-class LocalDockerTranslator(Translator):
-
-    def config_dir(self):
-        return self.info['config']
-
-    def working_dir(self):
-        return self.info['working']        
-
-    def data_dir(self):
-        return os.path.join(self.working_dir(), "data")
-
-    def task_dirs(self, stage_name):
-        stage_dir = os.path.join(self.working_dir(), stage_name)
-        input_dir  = os.path.join(stage_dir, 'input')
-        output_dir = os.path.join(stage_dir, 'output')
-        config_dir = os.path.join(stage_dir, 'config')
-        return input_dir, output_dir, config_dir
-
-    def _local_input_path(self, input_tag):
-        path = self.pipeline.info['inputs'].get(input_tag)
-
-        if path is None:
-            path = os.path.join(self.data_dir(), input_tag)
-
-        return path
-
-
-    def script_for_stage(self, stage_name, stage_class):
-        lines = []
-
-        input_dir, output_dir, config_dir = self.task_dirs(stage_name)
-
-        lines.append("# Make working directories")
-        lines.append("mkdir -p {}".format(input_dir))
-        lines.append("mkdir -p {}".format(output_dir))
-        lines.append("mkdir -p {}".format(config_dir))
-        lines.append("")
-
-        lines.append("# Hard link configuration files")
-        for config_tag, config_filename in stage_class.config.items():
-            filename = self.pipeline.cfg[stage_name]['config'][config_tag]
-            path = os.path.join(self.config_dir(), filename)
-            task_path = task_path = os.path.join(config_dir, config_filename)
-            lines.append("ln {} {}".format(path, task_path))
-
-
-        lines.append("# Hard link input files either from pipeline inputs or other module outputs")
-        for input_tag, task_filename in stage_class.inputs.items():
-            path = self._local_input_path(input_tag)
-            task_path = os.path.join(input_dir, task_filename)
-            lines.append("ln {} {}".format(path, task_path))
-
-        image = self.pipeline.image_name(stage_name)
-        input_mount = "-v {}:/opt/input".format(os.path.abspath(input_dir))
-        output_mount = "-v {}:/opt/output".format(os.path.abspath(output_dir))
-        config_mount = "-v {}:/opt/config".format(os.path.abspath(config_dir))
-
-        line = "docker run --rm -t {} {} {} {}".format(
-            input_mount, output_mount, config_mount, image)
-        lines.append(line)
-
-        for output_tag, output_filename in stage_class.outputs.items():
-            task_path = os.path.join(output_dir, output_filename)
-            path = os.path.join(self.data_dir(), output_tag)
-            lines.append("ln {} {}".format(task_path, path))
-
-        return lines
-
-
-
-
-    def generate(self, script_name):
-        self.pipeline.check_local_inputs()
-        # Generate a bash script to run the pipeline locally under docker
-        # Assume stages all built already
-        lines = ['#!/bin/sh']
-
-        lines.append("mkdir -p {}".format(self.data_dir()))
-
-        for stage_name, stage_class in self.pipeline.stages.items():
-            lines += self.script_for_stage(stage_name, stage_class)
-
-        lines.append("\n")
-        with open(script_name, 'w') as script:
-            script.write('\n'.join(lines))
-        utils.make_user_executable(script_name)
-
+        return self.stages.items()
