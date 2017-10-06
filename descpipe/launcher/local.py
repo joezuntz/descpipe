@@ -63,6 +63,7 @@ fi
         lines = []
 
         input_dir, output_dir, config_dir = self._task_dirs(stage_name)
+        lines.append("echo Running pipeline stage: {}".format(stage_name))
 
         lines.append("# Make working directories")
         lines.append("mkdir -p {}".format(input_dir))
