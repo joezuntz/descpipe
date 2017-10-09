@@ -12,6 +12,7 @@ pipeline:
   #Keys are as used by the modules.
 
 
+# details of where the pipeline is to be run and where to get local inputs
 runtime:
   working:   ./work
   #Place to read configuration files for each stage

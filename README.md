@@ -2,6 +2,25 @@
 
 ## Status
 
+Running a test example:
+```
+# Cloning the code repo and the image builder repo
+git clone https://github.com/joezuntz/descpipe
+cd descpipe
+git clone https://github.com/joezuntz/descpipe-images
+
+# Building the images - this runs "docker build" to make the stages.
+make
+cd ..
+
+# Generate the script that runs the pipeline
+./bin/descpipe local master-pipeline.yaml
+
+# Run the pipeline
+./test/sh
+
+```
+
 Requires Python3
 
 Generates a test.sh script that runs a one-step pipeline (catalog->2pt 2D) using packaged Dockerfiles.
