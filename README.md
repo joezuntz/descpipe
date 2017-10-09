@@ -15,7 +15,7 @@ make
 cd ..
 
 # Generate the script that runs the pipeline
-./bin/descpipe local master-pipeline.yaml
+./bin/descpipe local master-pipeline.yaml test.sh
 
 # Run the pipeline
 ./test/sh
