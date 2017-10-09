@@ -7,9 +7,10 @@ Running a test example:
 # Cloning the code repo and the image builder repo
 git clone https://github.com/joezuntz/descpipe
 cd descpipe
-git clone https://github.com/joezuntz/descpipe-images
+git clone https://github.com/joezuntz/descpipe-images  images
 
 # Building the images - this runs "docker build" to make the stages.
+cd images
 make
 cd ..
 
