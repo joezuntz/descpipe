@@ -2,6 +2,13 @@
 
 ## Status
 
+Requires Python3
+
+Generates a test.sh script that runs a one-step pipeline (catalog->2pt 2D) using packaged Dockerfiles.
+Requires a catalog input file to run.
+
+The actual pipeline steps are in this repo: https://github.com/joezuntz/descpipe-images
+
 Running a test example:
 ```
 # Cloning the code repo and the image builder repo
@@ -22,10 +29,6 @@ cd ..
 
 ```
 
-Requires Python3
-
-Generates a test.sh script that runs a one-step pipeline (catalog->2pt 2D) using packaged Dockerfiles.
-Requires a catalog input file to run.
 
 ## Some issues we face in pipeline design
 
