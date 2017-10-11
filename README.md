@@ -18,7 +18,7 @@ cd ..
 ./bin/descpipe local master-pipeline.yaml test.sh
 
 # Run the pipeline
-./test/sh
+./test.sh
 
 ```
 
