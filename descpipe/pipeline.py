@@ -1,7 +1,9 @@
 import yaml
+from dag import DAG
 import importlib.util
 import os
 from .errors import PipelineError
+
 
 special_keys = ['pipeline', 'runtime']
 
@@ -17,11 +19,17 @@ class Pipeline:
         self.owner = self.info['owner']
         self.basename = self.info['basename']
         self.version = self.info['version']
+        self.dag = DAG()
+        self.stages = {}
+        for name in self.info['stages']:
+            self.stages[name] = self.load_stage(name)
+            self.dag.add_node(name)
 
-        self.stages = {
-            name: self.load_stage(name)
-            for name in self.info['stages']
-        }
+        for name in self.info['stages']:
+            stage_info = self.cfg[name]
+            for parent in stage_info['depends-on']:
+                self.dag.add_edge(parent, name)
+
 
     def load_stage(self, name):
         for dirname in self.info['images']:
@@ -55,7 +63,6 @@ class Pipeline:
 
 
 
-
     def _read(self, input_file):
         "Read a YAML file represnting a pipline"
         if not hasattr(input_file, 'read'):
@@ -70,7 +77,8 @@ class Pipeline:
         return '{}/{}-{}:{}'.format(self.owner,self.basename, name, self.version)
 
 
-    def serial_sequence(self):
-        # for serial systems, choose an ordering for the pipeline
-        # TODO: order this
-        return self.stages.items()
+    def sequence(self):
+        "Return an acceptable serial ordering for the pipeline elements"
+        order = self.dag.topological_sort()
+        return [(name,self.stages[name]) for name in order]
+

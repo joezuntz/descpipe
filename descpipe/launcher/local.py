@@ -11,9 +11,9 @@ class LocalDockerLauncher(Launcher):
         # Generate a bash script to run the pipeline locally under docker
         # Assume stages all built already
         lines = ['#!/bin/sh']
-        lines.append("mkdir -p {}".format(self._data_dir()))
+        lines.append("mkdir -p {}".format(self.data_dir()))
 
-        for stage_name, stage_class in self.pipeline.serial_sequence():
+        for stage_name, stage_class in self.pipeline.sequence():
             lines.append("\n### Run pipeline stage {} ###\n".format(stage_name))
             lines += self._script_for_stage(stage_name, stage_class)
 
@@ -26,7 +26,7 @@ if [ ! -z "$(ls -A {data_dir})" ];
 then
     mv {data_dir}/* {output_dir}/
 fi
-    """.format(data_dir=self._data_dir(), output_dir=self.output_dir())
+    """.format(data_dir=self.data_dir(), output_dir=self.output_dir())
         lines.append(line)
         lines.append("\n")
 
@@ -36,15 +36,15 @@ fi
 
 
 
-    def _working_dir(self):
+    def working_dir(self):
         return self.info['working']        
 
-    def _data_dir(self):
-        return os.path.join(self._working_dir(), "data")
+    def data_dir(self):
+        return os.path.join(self.working_dir(), "data")
 
 
     def _task_dirs(self, stage_name):
-        stage_dir = os.path.join(self._working_dir(), stage_name)
+        stage_dir = os.path.join(self.working_dir(), stage_name)
         input_dir  = os.path.join(stage_dir, 'input')
         output_dir = os.path.join(stage_dir, 'output')
         config_dir = os.path.join(stage_dir, 'config')
@@ -83,8 +83,9 @@ fi
 
 
         lines.append("# Hard link input files either from pipeline inputs or other module outputs")
-        for input_tag, task_filename in stage_class.inputs.items():
+        for input_tag, input_type in stage_class.inputs.items():
             path = self._input_path(input_tag)
+            task_filename = "{}.{}".format(input_tag, input_type)
             task_path = os.path.join(input_dir, task_filename)
             lines.append("ln {} {}".format(path, task_path))
 
@@ -100,9 +101,10 @@ fi
         lines.append(line)
         lines.append("")
 
-        for output_tag, output_filename in stage_class.outputs.items():
+        for output_tag, output_type  in stage_class.outputs.items():
+            output_filename = "{}.{}".format(output_tag, output_type)
             task_path = os.path.join(output_dir, output_filename)
-            path = os.path.join(self._data_dir(), output_tag)
+            path = os.path.join(self.data_dir(), output_tag)
             lines.append("ln {} {}".format(task_path, path))
 
 

@@ -1,37 +1,33 @@
-
+import os
 # Use a temporary directory in $SCRATCH as the workspace
 # Generate batch scripts
 # Make a run directory with all the scripts in also on SCRATCH in the workspace
 
 
 class NerscShifterLauncher(Launcher):
+    def working_dir(self):
+        return self.info['working']
+
+    def script_dir(self):
+        return os.path.join(self._working_dir(), 'batch')
 
     def generate(self, script_name):
         self._check_inputs()
-        # Generate a bash script to run the pipeline locally under docker
-        # Assume stages all built already
+        # Maybe do a shifterimg pull command for each step?
+        os.mkdirs(self.script_dir())
+
+
         lines = ['#!/bin/sh']
         lines.append("mkdir -p {}".format(self._data_dir()))
 
-        for stage_name, stage_class in self.pipeline.serial_sequence():
-            lines.append("\n### Run pipeline stage {} ###\n".format(stage_name))
-            lines += self._script_for_stage(stage_name, stage_class)
+        for stage_name, stage_class in self.pipeline.sequence():
+            self._batch_script_for_stage(stage_name, stage_class)
 
 
-        lines.append("\n### Now pipeline is complete. Copy results out. ###\n".format(stage_name))
-
-        # Final copy out of results
-        line = """
-if [ ! -z "$(ls -A {data_dir})" ];
-then
-    mv {data_dir}/* {output_dir}/
-fi
-    """.format(data_dir=self._data_dir(), output_dir=self.output_dir())
-        lines.append(line)
-        lines.append("\n")
-
-        with open(script_name, 'w') as script:
-            script.write('\n'.join(lines))
-        utils.make_user_executable(script_name)
-
-
+    def _batch_script_for_stage(stage_name, stage_class):
+        processes = self.
+        """#!/usr/bin/env bash
+#SBATCH
+blah blah blah
+srun -N {nodes} shifter run {image}
+        """        
