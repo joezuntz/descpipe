@@ -10,12 +10,16 @@ class LocalDockerLauncher(Launcher):
         self._check_inputs()
         # Generate a bash script to run the pipeline locally under docker
         # Assume stages all built already
-        lines = ['#!/bin/sh']
-        lines.append("mkdir -p {}".format(self.data_dir()))
+        lines = ['#!/bin/sh', 'set -e']
 
         for stage_name, stage_class in self.pipeline.sequence():
-            lines.append("\n### Run pipeline stage {} ###\n".format(stage_name))
             lines += self._script_for_stage(stage_name, stage_class)
+
+
+        lines.append("mkdir -p {}".format(self.data_dir()))
+        lines.append("\n\n")
+        for stage_name, stage_class in self.pipeline.sequence():
+            lines.append("run_{}".format(stage_name))
 
 
         lines.append("\n### Now pipeline is complete. Copy results out. ###\n".format(stage_name))
@@ -50,17 +54,17 @@ fi
         config_dir = os.path.join(stage_dir, 'config')
         return input_dir, output_dir, config_dir
 
-    def _input_path(self, input_tag):
+    def _input_path(self, input_tag, input_type):
         path = self.info['inputs'].get(input_tag)
 
         if path is None:
-            path = os.path.join(self._data_dir(), input_tag)
+            path = os.path.join(self.data_dir(), input_tag+"."+input_type)
 
         return path
 
 
     def _script_for_stage(self, stage_name, stage_class):
-        lines = []
+        lines = ["\n### Run pipeline stage {} ###\n".format(stage_name), "function run_{} {{".format(stage_name)]
 
         input_dir, output_dir, config_dir = self._task_dirs(stage_name)
         lines.append("echo Running pipeline stage: {}".format(stage_name))
@@ -79,24 +83,29 @@ fi
             filename = self.pipeline.cfg[stage_name]['config'][config_tag]
             path = os.path.join(self.config_dir(), filename)
             task_path = task_path = os.path.join(config_dir, config_filename)
-            lines.append("ln {} {}".format(path, task_path))
+            lines.append("ln -f {} {}".format(path, task_path))
 
 
         lines.append("# Hard link input files either from pipeline inputs or other module outputs")
         for input_tag, input_type in stage_class.inputs.items():
-            path = self._input_path(input_tag)
+            path = self._input_path(input_tag, input_type)
             task_filename = "{}.{}".format(input_tag, input_type)
             task_path = os.path.join(input_dir, task_filename)
-            lines.append("ln {} {}".format(path, task_path))
+            lines.append("ln -f {} {}".format(path, task_path))
 
         image = self.pipeline.image_name(stage_name)
         input_mount = "-v {}:/opt/input".format(os.path.abspath(input_dir))
         output_mount = "-v {}:/opt/output".format(os.path.abspath(output_dir))
         config_mount = "-v {}:/opt/config".format(os.path.abspath(config_dir))
+        # lines.append("")
+        # lines.append("if [ $DESC_DEBUG == 1 ] ")
+        # lines.append("then")
+        # lines.append('    CMD=\'bash -lc "python -m pdb /opt/desc/run.py"\'')
+        # lines.append("fi")
         lines.append("")
         lines.append("# Run the image")
         lines.append("")
-        line = "docker run --rm -t {} {} {} {}".format(
+        line = "docker run --rm -it {} {} {} {} $CMD".format(
             input_mount, output_mount, config_mount, image)
         lines.append(line)
         lines.append("")
@@ -104,20 +113,21 @@ fi
         for output_tag, output_type  in stage_class.outputs.items():
             output_filename = "{}.{}".format(output_tag, output_type)
             task_path = os.path.join(output_dir, output_filename)
-            path = os.path.join(self.data_dir(), output_tag)
-            lines.append("ln {} {}".format(task_path, path))
-
+            data_path = os.path.join(self.data_dir(), output_filename)
+            lines.append("ln -f {} {}".format(task_path, data_path))
+        lines[2:] = utils.indent(lines[2:])
+        lines.append("}\n\n\n")
 
         return lines
 
 
 
     def _check_inputs(self):
-        inputs = self.pipeline.inputs()
+        inputs = self.pipeline.input_tags()
         for tag in inputs:
             path = self.info['inputs'].get(tag)
             if path is None:
-                raise PipelineError("No path for input {} is specified in the pipeline file".format(tag))
+                raise InputError("No path for input {} is specified in the pipeline file".format(tag))
             if not os.path.exists(path):
                 raise InputError("Nothing found at specified input path: {}".format(path))
             if not os.path.isfile(path):

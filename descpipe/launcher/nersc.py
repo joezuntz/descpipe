@@ -25,7 +25,8 @@ class NerscShifterLauncher(Launcher):
 
 
     def _batch_script_for_stage(stage_name, stage_class):
-        processes = self.
+        # processes = self.
+        pass
         """#!/usr/bin/env bash
 #SBATCH
 blah blah blah

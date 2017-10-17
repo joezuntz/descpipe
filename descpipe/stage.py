@@ -1,6 +1,5 @@
 import os
 import sys
-import argparse
 
 parallelism_serial = "serial"
 parallelism_mpi = "mpi"
@@ -18,6 +17,23 @@ class Stage:
         stage = cls()
         stage.run()
 
+    def get_input_filenames(cls):
+        return [self.get_input_filename(name) for name in self.inputs.keys()]
+
+    def get_output_filenames(cls):
+        return [self.get_output_filename(name) for name in self.outputs.keys()]
+
+
+    def get_input_filename(cls, name):
+        filetype = self.inputs[name]
+        filename = "{}.{}".format(name,filetype)
+        return filename
+
+    def get_output_filename(cls, name):
+        filetype = self.outputs[name]
+        filename = "{}.{}".format(name,filetype)
+        return filename
+
     def get_config_path(self, name):
         "Return the complete path to a configuration file from the tag name"
         filename = self.config[name]
@@ -25,14 +41,12 @@ class Stage:
 
     def get_input_path(self, name):
         "Return the complete path to an input file from the tag name"
-        filetype = self.inputs[name]
-        filename = "{}.{}".format(name,filetype)
+        filename = self.get_input_filename(name)
         return os.path.join(self.input_dir, filename)
 
     def get_output_path(self, name):
         "Return the complete path to an output file from the tag name"
-        filetype = self.outputs[name]
-        filename = "{}.{}".format(name,filetype)
+        filename = self.get_output_filename(name)
         return os.path.join(self.output_dir, filename)
 
     def _setup_parallel_runtime(self):
