@@ -1,8 +1,9 @@
 import argparse
 import sys
+import collections
 
 from .pipeline import Pipeline
-from .launcher import LocalDockerLauncher
+from .launcher import LocalDockerLauncher, NerscSerialLauncher
 
 parser = argparse.ArgumentParser(description="Manage, build, and launch DESC pipelines")
 subparsers = parser.add_subparsers(help="What to do with the pipeline", dest='task')
@@ -19,15 +20,37 @@ parser_local.add_argument('pipe_file', type=str, help='Input pipeline file to bu
 parser_local = subparsers.add_parser('push', help='Run "make push" in the pipe directories')
 parser_local.add_argument('pipe_file', type=str, help='Input pipeline file to push')
 
+parser_local = subparsers.add_parser('nersc', help='Make a bash script to the pipeline under shifter')
+parser_local.add_argument('pipe_file', type=str, help='Input pipeline file to generate a script for')
+parser_local.add_argument('script_file', type=str, help='Output bash script to generate')
+parser_local.add_argument('-p', "--pull",  action='store_true', help='Pull the ')
+
+
+tasks = {}
+
+def task(function):
+    tasks[function.__name__] = function
+    return function
+
+@task
 def build(args):
     pipeline=Pipeline(args.pipe_file)
     pipeline.build()
 
+@task
 def push(args):
     pipeline=Pipeline(args.pipe_file)
     pipeline.push()
 
+@task
+def nersc(args):
+    pipeline=Pipeline(args.pipe_file)
+    if args.pull:
+        pipeline.pull()
+    launcher=NerscSerialLauncher(pipeline)
+    launcher.generate(args.script_file)
 
+@task
 def local(args):
     pipeline=Pipeline(args.pipe_file)
     if args.build:
@@ -35,18 +58,18 @@ def local(args):
     launcher=LocalDockerLauncher(pipeline)
     launcher.generate(args.script_file)
 
+def unknown(args):
+    sys.stderr.write("Unknown command {}\n".format(args.task))
+
+
 def main():
     args = parser.parse_args()
     if not args.task:
         parser.print_help()
-    if args.task=='local':
-        local(args)
-    elif args.task=='build':
-        build(args)
-    elif args.task=='push':
-        push(args)
+        return 1
     else:
-        sys.stderr.write("Unknown command {}\n".format(args.task))
+        task = tasks.get(args.task, unknown)
+        return task(args)        
 
 if __name__ == '__main__':
     status = main()

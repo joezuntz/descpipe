@@ -39,6 +39,10 @@ class Pipeline:
         for dirname in self.info['images']:
             os.system("cd {}; make push".format(dirname))
 
+    def pull(self):
+        for dirname in self.info['images']:
+            os.system("cd {}; make pull".format(dirname))
+
     def load_stage(self, name):
         for dirname in self.info['images']:
             dirpath = os.path.join(dirname,name)
