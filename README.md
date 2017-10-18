@@ -4,6 +4,9 @@
 
 This package is a prototype python 3 framework for building pipelines where each stage in the pipeline is built into a Docker container.
 
+The actual pipeline steps are in a companion repository: https://github.com/joezuntz/descpipe-images
+
+
 We face various issues when building and running pipelines:
 - Heterogenous machines & architectures
 - Provenance and version tracking
@@ -24,9 +27,8 @@ In future other launchers will submit it to systems like NERSC as well.
 
 An example file in the pipelines directory builds a three-step pipeline (tomographic binning, photometric redshift stacking, correlation functions).  This pipeline requires two input catalog files to run - currently using public DES SV data.
 
-The actual pipeline steps are in a separate repository: https://github.com/joezuntz/descpipe-images
 
-The code requires pydag, which can be installed with `pip3 install py-dag`.
+The code runs under python3 and requires pyyaml and pydag, which can be installed with `pip3 install pyyaml py-dag`.
 
 Running a test example:
 ```
@@ -49,6 +51,10 @@ wget -o test/inputs/des-sv-ngmix-pipetest.fits  https://portal.nersc.gov/project
 ./test.sh
 
 ```
+
+On NERSC you would run on the nodes under salloc as well and change "local" to "nersc" and "build" to "pull" above.
+
+
 
 ## Anatomy of a Stage
 
@@ -73,6 +79,9 @@ COPY run.py /opt/desc/run.py
 
 Each of these commands tells docker to do another step in building this image.  The file starts with the `FROM` directive, which specifies a base image (shown in the `images/base` directory) that is the foundation of this image.  That base image contains the DM stack, among other things.  We may want to revisit this in future and make slimmer images.
 
+The RUN line installs a dependency of the code, fitsio.  We have to do it under bash in order to use the DM stack.
+We can look at changing this in future if we use a different base image (I currently use a DM-supplied one).
+
 The other lines run commands in the image and copy files in from the `tomography` directory.
 
 ### run.py
@@ -83,9 +92,22 @@ Any input required by the code must be specified in the inputs dictionary, and s
 
 The file must also have a method `run`, which is executed when the code is launched.  Any imports that do not come built in with python should only be imported within this method.
 
+The run.py should be a thin layer around other libraries, just finding inputs and outputs for them.
+The current design of the treecorr run.py isn't great.
 
 
 ## Notes
+
+### Directions for future work
+
+ - Implementing our pipelines stages as Dockerfiles + run.py
+ - Standards for installing packages from github rather than packaging locally
+ - Better management of images than just using my name for all of them :-)
+ - Singularity support
+ - Mode for running whole pipeline under python rather than making shell script?
+ - Unifying some aspects of launchers and making them *much* less hacky
+ - Adding features to check type of input and output files (using types beyond just specifying output suffix "fits")
+ - Adding launcher for Pegasus
 
 ### What are Docker images?
 
@@ -110,7 +132,7 @@ The file must also have a method `run`, which is executed when the code is launc
 
 ### Questions
 
-- How should embarassingly paralle jobs be run?
+- How should embarassingly parallel jobs be run?
 - How should non-embarassingly parallel jobs be run?
 - Could the inputs/outputs dictionary be allowed to specify particular schemas?
 - Should we always go via a generated submission script or could we operate the pipeline

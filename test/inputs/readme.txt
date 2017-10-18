@@ -1,4 +1,3 @@
 Download a test data set by running:
-    wget -O desc-pipe-test-catalog.fits "https://drive.google.com/uc?export=download&id=0B0eLUWHKnhEFUVlfZFhLNXdWSG8"
-
-This doesn't work with curl - something to with cookies.
+    wget -o des-sv-annz-pipetest.fits  https://portal.nersc.gov/projecta/lsst/wl/des-sv-annz-pipetest.fits
+    wget -o des-sv-ngmix-pipetest.fits  https://portal.nersc.gov/projecta/lsst/wl/des-sv-ngmix-pipetest.fits
