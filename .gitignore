@@ -2,4 +2,11 @@ images/build/*.log
 
 *__pycache__
 *.pyc
-images/
+images/build/
+test.sh
+test/inputs/des-sv-annz-pipetest.fits
+test/inputs/des-sv-ngmix-pipetest.fits
+test/output/
+work/
+build/*
+images/*

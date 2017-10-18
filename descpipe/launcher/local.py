@@ -24,6 +24,7 @@ class LocalDockerLauncher(Launcher):
 
         lines.append("\n### Now pipeline is complete. Copy results out. ###\n".format(stage_name))
 
+        lines.append("mkdir -p {}".format(self.output_dir()))
         # Final copy out of results
         line = """
 if [ ! -z "$(ls -A {data_dir})" ];

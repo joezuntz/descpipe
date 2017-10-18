@@ -1,0 +1,4 @@
+bin_column: Z_MEAN
+zmin: 0.2
+zmax: 1.2
+nbin: 3

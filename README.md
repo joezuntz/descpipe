@@ -40,10 +40,10 @@ wget -o test/inputs/des-sv-annz-pipetest.fits  https://portal.nersc.gov/projecta
 wget -o test/inputs/des-sv-ngmix-pipetest.fits  https://portal.nersc.gov/projecta/lsst/wl/des-sv-ngmix-pipetest.fits
 
 # Building the images - this runs "docker build" to make the stages.
-./bin/descpipe build pipelines/master.yaml
+./bin/descpipe build test/test.yaml
 
 # Generate the script that runs the pipeline
-./bin/descpipe local pipelines/master.yaml test.sh
+./bin/descpipe local test/pipeline.yaml test.sh
 
 # Run the pipeline
 ./test.sh
