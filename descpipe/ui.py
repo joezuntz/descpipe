@@ -16,9 +16,16 @@ parser_local.add_argument('-b', "--build",  action='store_true', help='Run "make
 parser_local = subparsers.add_parser('build', help='Run "make" in the pipe directories')
 parser_local.add_argument('pipe_file', type=str, help='Input pipeline file to build')
 
+parser_local = subparsers.add_parser('push', help='Run "make push" in the pipe directories')
+parser_local.add_argument('pipe_file', type=str, help='Input pipeline file to push')
+
 def build(args):
     pipeline=Pipeline(args.pipe_file)
     pipeline.build()
+
+def push(args):
+    pipeline=Pipeline(args.pipe_file)
+    pipeline.push()
 
 
 def local(args):
@@ -36,6 +43,8 @@ def main():
         local(args)
     elif args.task=='build':
         build(args)
+    elif args.task=='push':
+        push(args)
     else:
         sys.stderr.write("Unknown command {}\n".format(args.task))
 
