@@ -146,6 +146,30 @@ The current design of the treecorr run.py isn't great.
 - Could we just install all the needed stuff on one giant on - DM, OSG stuff like CVMFS, etc.?
 
 
+## Non-trivial features needed in current pipeline steps
+
+
+### tomography
+
+- tomography for metacalibration samples (for selection bias from redshift cuts)
+
+### pz_stack
+- stacking/reconstruction methods (e.g. chippr)
+- metadata: area, sigma_e,  n_effective  (variants of these)
+- mean shear (and metacalibration variant)
+- masks 
+
+### treecorr
+
+- parallelization
+- calibration
+- ggl & w(theta)
+- bins in lens sample
+- subtraction of mean shears
+- region cuts & selection
+- randoms for ggl & w(theta)
+
+
 
 ## Nuns Fret Not at Their Convent's Narrow Room
 
