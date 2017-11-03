@@ -46,6 +46,9 @@ git clone https://github.com/joezuntz/descpipe-images  images
 wget -o test/inputs/des-sv-annz-pipetest.fits  https://portal.nersc.gov/projecta/lsst/wl/des-sv-annz-pipetest.fits
 wget -o test/inputs/des-sv-ngmix-pipetest.fits  https://portal.nersc.gov/projecta/lsst/wl/des-sv-ngmix-pipetest.fits
 
+# To avoid installing centrally while testing
+export PYTHONPATH=$PYTHONPATH:$PWD
+
 # Building the images - this runs "docker build" to make the stages.
 ./bin/descpipe build test/test.yaml
 
