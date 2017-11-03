@@ -3,7 +3,7 @@ import sys
 import collections
 
 from .pipeline import Pipeline
-from .launcher import LocalDockerLauncher, NerscSerialLauncher
+from .launcher import LocalDockerLauncher, NerscSerialLauncher, PegasusLauncher
 
 parser = argparse.ArgumentParser(description="Manage, build, and launch DESC pipelines")
 subparsers = parser.add_subparsers(help="What to do with the pipeline", dest='task')
@@ -23,7 +23,11 @@ parser_local.add_argument('pipe_file', type=str, help='Input pipeline file to pu
 parser_local = subparsers.add_parser('nersc', help='Make a bash script to the pipeline under shifter')
 parser_local.add_argument('pipe_file', type=str, help='Input pipeline file to generate a script for')
 parser_local.add_argument('script_file', type=str, help='Output bash script to generate')
-parser_local.add_argument('-p', "--pull",  action='store_true', help='Pull the ')
+
+parser_local = subparsers.add_parser('pegasus', help='Make a bash script to the pipeline under shifter')
+parser_local.add_argument('pipe_file', type=str, help='Input pipeline file to generate a script for')
+parser_local.add_argument('daxfile', type=str, help='Output DAX generation script')
+parser_local.add_argument('--tcfile', default='tc.txt', type=str, help='Output transformation catalog')
 
 
 tasks = {}
@@ -45,10 +49,16 @@ def push(args):
 @task
 def nersc(args):
     pipeline=Pipeline(args.pipe_file)
-    if args.pull:
-        pipeline.pull()
     launcher=NerscSerialLauncher(pipeline)
     launcher.generate(args.script_file)
+
+@task
+def pegasus(args):
+    pipeline=Pipeline(args.pipe_file)
+    launcher=PegasusLauncher(pipeline)
+    launcher.generate(args.daxfile, args.tcfile)
+
+
 
 @task
 def local(args):

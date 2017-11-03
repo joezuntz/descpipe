@@ -102,3 +102,6 @@ class Pipeline:
         order = self.dag.topological_sort()
         return [(name,self.stages[name]) for name in order]
 
+
+    def dependencies(self, name):
+        return self.dag.predecessors(name)
