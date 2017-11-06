@@ -53,10 +53,10 @@ class Pipeline:
                 path = run_path
                 break
         else:
-            raise PipelineError("""No Stage called {} was found - needs to be in one 
+            raise PipelineError("""No Stage called {} was found - needs to be in one
                 of the images directories and contain Dockerfile, run.py""".format(name))
 
-        # We want to load a module based on a python.  The python people keep changing how to do this in obscure 
+        # We want to load a module based on a python.  The python people keep changing how to do this in obscure
         # ways.  This one is deprecated but works back in python 3.4 which is what centos 7 can provide.
         loader = importlib.machinery.SourceFileLoader(name, path)
         module = loader.load_module()
