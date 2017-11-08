@@ -4,7 +4,7 @@ from .launcher import Launcher
 from ..errors import InputError
 
 
-class LocalDockerLauncher(Launcher):
+class LocalScriptLauncher(Launcher):
 
     def generate(self, script_name):
         self._check_inputs()

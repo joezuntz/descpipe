@@ -3,7 +3,7 @@ import sys
 import collections
 
 from .pipeline import Pipeline
-from .launcher import LocalDockerLauncher, NerscSerialLauncher, PegasusLauncher, LocalDockerLiveLauncher
+from .launcher import *
 
 parser = argparse.ArgumentParser(description="Manage, build, and launch DESC pipelines")
 subparsers = parser.add_subparsers(help="What to do with the pipeline", dest='task')
@@ -72,7 +72,7 @@ def pegasus(args):
 @task
 def run(args):
     pipeline=Pipeline(args.pipe_file)
-    launcher=LocalDockerLiveLauncher(pipeline)
+    launcher=LocalLauncher(pipeline)
     launcher.run()
 
 
@@ -81,7 +81,7 @@ def local(args):
     pipeline=Pipeline(args.pipe_file)
     if args.build:
         pipeline.build()
-    launcher=LocalDockerLauncher(pipeline)
+    launcher=LocalScriptLauncher(pipeline)
     launcher.generate(args.script_file)
 
 def unknown(args):
