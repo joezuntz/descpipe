@@ -3,10 +3,13 @@ import sys
 import collections
 
 from .pipeline import Pipeline
-from .launcher import LocalDockerLauncher, NerscSerialLauncher, PegasusLauncher
+from .launcher import LocalDockerLauncher, NerscSerialLauncher, PegasusLauncher, LocalDockerLiveLauncher
 
 parser = argparse.ArgumentParser(description="Manage, build, and launch DESC pipelines")
 subparsers = parser.add_subparsers(help="What to do with the pipeline", dest='task')
+
+parser_local = subparsers.add_parser('run', help='Run the pipeline, without writing an intermediate script to do so manually')
+parser_local.add_argument('pipe_file', type=str, help='Input pipeline file to generate a script for')
 
 
 parser_local = subparsers.add_parser('local', help='Make a bash script to the pipeline locally under docker')
@@ -58,6 +61,11 @@ def pegasus(args):
     launcher=PegasusLauncher(pipeline)
     launcher.generate(args.daxfile, args.tcfile)
 
+@task
+def run(args):
+    pipeline=Pipeline(args.pipe_file)
+    launcher=LocalDockerLiveLauncher(pipeline)
+    launcher.run()
 
 
 @task
