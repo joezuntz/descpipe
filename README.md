@@ -28,9 +28,14 @@ In future other launchers will submit it to systems like NERSC as well.
 An example file in the pipelines directory builds a three-step pipeline (tomographic binning, photometric redshift stacking, correlation functions).  This pipeline requires two input catalog files to run - currently using public DES SV data.
 
 
-The code runs under python3 and requires pyyaml and pydag, which can be installed with `pip3 install pyyaml py-dag`.
+The code runs under python3 and requires pyyaml and pydag, which can be installed with:
 
-Running a test example:
+```
+pip3 install pyyaml py-dag
+```
+
+Then you can install and run a test example:
+
 ```
 # Cloning the code repo and the image builder repo
 git clone https://github.com/joezuntz/descpipe
@@ -40,6 +45,9 @@ git clone https://github.com/joezuntz/descpipe-images  images
 # Download the input data
 wget -o test/inputs/des-sv-annz-pipetest.fits  https://portal.nersc.gov/projecta/lsst/wl/des-sv-annz-pipetest.fits
 wget -o test/inputs/des-sv-ngmix-pipetest.fits  https://portal.nersc.gov/projecta/lsst/wl/des-sv-ngmix-pipetest.fits
+
+# To avoid installing centrally while testing
+export PYTHONPATH=$PYTHONPATH:$PWD
 
 # Building the images - this runs "docker build" to make the stages.
 ./bin/descpipe build test/test.yaml

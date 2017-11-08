@@ -23,6 +23,9 @@ parser_local.add_argument('pipe_file', type=str, help='Input pipeline file to bu
 parser_local = subparsers.add_parser('push', help='Run "make push" in the pipe directories')
 parser_local.add_argument('pipe_file', type=str, help='Input pipeline file to push')
 
+parser_local = subparsers.add_parser('pull', help='Run "make pull" in the pipe directories')
+parser_local.add_argument('pipe_file', type=str, help='Input pipeline file to pull')
+
 parser_local = subparsers.add_parser('nersc', help='Make a bash script to the pipeline under shifter')
 parser_local.add_argument('pipe_file', type=str, help='Input pipeline file to generate a script for')
 parser_local.add_argument('script_file', type=str, help='Output bash script to generate')
@@ -48,6 +51,11 @@ def build(args):
 def push(args):
     pipeline=Pipeline(args.pipe_file)
     pipeline.push()
+
+@task
+def pull(args):
+    pipeline=Pipeline(args.pipe_file)
+    pipeline.pull()
 
 @task
 def nersc(args):
@@ -87,9 +95,8 @@ def main():
         return 1
     else:
         task = tasks.get(args.task, unknown)
-        return task(args)        
+        return task(args)
 
 if __name__ == '__main__':
     status = main()
     sys.exit(status)
-
