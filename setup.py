@@ -6,5 +6,5 @@ setup(name='descpipe',
       version='1.1',
       scripts=['bin/descpipe'],
       packages=['descpipe', 'descpipe.launcher'],
-      install_requires=['pyyaml','py-dag']
+      install_requires=['pyyaml','py-dag', 'cwlgen']
       )
