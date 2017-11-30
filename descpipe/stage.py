@@ -16,9 +16,6 @@ def at_runtime_only(method):
 
 class Stage:
     def __init__(self):
-        self.config_dir = os.environ['DESC_CONFIG']
-        self.input_dir = os.environ['DESC_INPUT']
-        self.output_dir = os.environ['DESC_OUTPUT']
         self.parallelism = None
         self.at_runtime = False
 
