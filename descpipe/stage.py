@@ -24,12 +24,12 @@ class Stage:
         return [self.get_output_filename(name) for name in self.outputs.keys()]
 
 
-    def get_input_filename(cls, name):
+    def get_input_filename(self, name):
         filetype = self.inputs[name]
         filename = "{}.{}".format(name,filetype)
         return filename
 
-    def get_output_filename(cls, name):
+    def get_output_filename(self, name):
         filetype = self.outputs[name]
         filename = "{}.{}".format(name,filetype)
         return filename

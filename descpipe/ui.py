@@ -36,6 +36,11 @@ parser_local.add_argument('daxfile', type=str, help='Output DAX generation scrip
 parser_local.add_argument('--tcfile', default='tc.txt', type=str, help='Output transformation catalog')
 
 
+parser_local = subparsers.add_parser('cwl', help='Make a directory containing CWL files')
+parser_local.add_argument('pipe_file', type=str, help='Input pipeline file to generate a script for')
+parser_local.add_argument('dirname', type=str, help='Directory to put generated CWL files into')
+
+
 tasks = {}
 
 def task(function):
@@ -83,6 +88,13 @@ def local(args):
         pipeline.build()
     launcher=LocalScriptLauncher(pipeline)
     launcher.generate(args.script_file)
+
+@task 
+def cwl(args):
+    pipeline=Pipeline(args.pipe_file)
+    launcher=CWLLauncher(pipeline)
+    launcher.generate(args.dirname)
+
 
 def unknown(args):
     sys.stderr.write("Unknown command {}\n".format(args.task))

@@ -59,7 +59,7 @@ class PegasusLauncher(Launcher):
 
 
     def generate_dax(self, daxfile):
-        from Pegasus.DAX3 import ADAG, Job, File, Link
+        from .DAX3 import ADAG, Job, File, Link
 
         # The DAX generator
         dax = ADAG("pipeline")
@@ -91,8 +91,7 @@ class PegasusLauncher(Launcher):
             # These will not be built during the pipeline and must be 
             # provided by the user
             for config_tag, config_filename in stage_class.config.items():
-                filename = self.pipeline.cfg[stage_name]['config'][config_tag]
-                config_path = os.path.join(self.config_dir(), filename)
+                config_path = self.info['config'][stage_name][config_tag]
                 config = File(config_path)
                 job.uses(config, link=Link.INPUT)
 

@@ -55,8 +55,7 @@ class LocalLauncher(Launcher):
         utils.mkdir_p(self.output_dir())
 
         for config_tag, config_filename in stage_class.config.items():
-            filename = self.pipeline.cfg[stage_name]['config'][config_tag]
-            path = os.path.join(self.config_dir(), filename)
+            path = self.info['config'][stage_name][config_tag]
             task_path = os.path.join(config_dir, config_filename)
             print("Linking config file {} -> {}".format(path, task_path))
             utils.link_force(path, task_path)
@@ -69,12 +68,15 @@ class LocalLauncher(Launcher):
             print("Linking input file {} -> {}".format(path, task_path))
             utils.link_force(path, task_path)
 
+        for output_tag, output_type  in stage_class.outputs.items():
+            output_filename = "{}.{}".format(output_tag, output_type)
+
         image = self.pipeline.image_name(stage_name)
         input_mount = "-v {}:/opt/input".format(os.path.abspath(input_dir))
         output_mount = "-v {}:/opt/output".format(os.path.abspath(output_dir))
         config_mount = "-v {}:/opt/config".format(os.path.abspath(config_dir))
 
-        cmd = "docker run --rm -it {} {} {} {} $CMD".format(
+        cmd = "docker run --rm -it {} {} {} {} /opt/desc/run.py".format(
             input_mount, output_mount, config_mount, image)
 
         print("Running container:")

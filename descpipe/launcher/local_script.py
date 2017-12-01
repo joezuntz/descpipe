@@ -39,6 +39,7 @@ fi
             script.write('\n'.join(lines))
         utils.make_user_executable(script_name)
 
+        print("Execute pipeline with {}".format(script_name))
 
 
     def working_dir(self):
@@ -81,9 +82,8 @@ fi
 
         lines.append("# Hard link configuration files")
         for config_tag, config_filename in stage_class.config.items():
-            filename = self.pipeline.cfg[stage_name]['config'][config_tag]
-            path = os.path.join(self.config_dir(), filename)
-            task_path = task_path = os.path.join(config_dir, config_filename)
+            path = self.info['config'][stage_name][config_tag]
+            task_path = os.path.join(config_dir, config_filename)
             lines.append("ln -f {} {}".format(path, task_path))
 
 

@@ -17,13 +17,16 @@ runtime:
   launcher: local
   working:   ./work
   #Place to read configuration files for each stage
-  config:   ./test/config
-  #Place to copy the outputs to:
   output:   ./test/output
   # Pipeline details (determines the Docker image name)
   inputs:
     shear-catalog: ./test/inputs/des-sv-ngmix-pipetest.fits
     photoz-catalog: ./test/inputs/des-sv-annz-pipetest.fits
+  config:
+    treecorr:
+      config: ./test/config/treecorr-config.yaml
+    tomography:
+      config: ./test/config/tomo-config.yaml
 
 
 # Stages in the pipeline
@@ -31,8 +34,6 @@ runtime:
 # Put the objects into bins.
 tomography:
   depends-on: []
-  config:
-    config: tomo-config.yaml
 
 pz_stack:
   depends-on: [tomography]
@@ -40,8 +41,6 @@ pz_stack:
 
 treecorr:
   depends-on: [tomography, pz_stack]
-  config:
-    config: treecorr-config.yaml  
   # something like this?
   nodes: 1
   processes: 1
