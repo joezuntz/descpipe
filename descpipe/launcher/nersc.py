@@ -81,8 +81,8 @@ fi
 
         lines.append("# Hard link configuration files")
         for config_tag, config_filename in stage_class.config.items():
-            filename = self.pipeline.cfg[stage_name]['config'][config_tag]
-            path = os.path.join(self.config_dir(), filename)
+            path = self.info['config'][stage_name][config_tag]
+            path = os.path.abspath(path)
             task_path = task_path = os.path.join(config_dir, config_filename)
             lines.append("cp {} {}".format(path, task_path))
 
