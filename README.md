@@ -50,7 +50,7 @@ wget -o test/inputs/des-sv-ngmix-pipetest.fits  https://portal.nersc.gov/project
 export PYTHONPATH=$PYTHONPATH:$PWD
 
 # Building the images - this runs "docker build" to make the stages.
-./bin/descpipe build test/test.yaml
+./bin/descpipe build test/pipeline.yaml
 
 # Generate the script that runs the pipeline
 ./bin/descpipe local test/pipeline.yaml test.sh
