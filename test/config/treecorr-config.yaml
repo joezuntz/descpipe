@@ -24,7 +24,7 @@ gg_file_name: gg.out
 # 1 = warnings (This is the default if not specified)
 # 2 = progress information
 # 3 = extra debugging output
-verbose: 2
+verbose: 3
 
 # num_threads = the number of threads to use.
 # The default is to let OpenMP determine an appropriate number of threads automatically.

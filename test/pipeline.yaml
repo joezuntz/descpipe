@@ -27,6 +27,8 @@ runtime:
       config: ./test/config/treecorr-config.yaml
     tomography:
       config: ./test/config/tomo-config.yaml
+    ngmix_2pt:
+      config: ./test/config/treecorr-config.yaml
 
 
 # Stages in the pipeline
@@ -42,7 +44,12 @@ pz_stack:
 treecorr:
   depends-on: [tomography, pz_stack]
   # something like this?
-  nodes: 1
-  processes: 1
+  openmp: 8
   minutes: 5
+
+ngmix_2pt:
+  depends-on: []
+  github: joezuntz/ngmix_2pt
+  checkout: master
+  openmp: 8
 
