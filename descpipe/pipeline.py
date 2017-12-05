@@ -4,7 +4,7 @@ import importlib.util
 import importlib.machinery
 import os
 from .errors import PipelineError
-
+import tempfile
 
 special_keys = ['pipeline', 'runtime']
 
@@ -44,23 +44,59 @@ class Pipeline:
         for dirname in self.info['images']:
             os.system("cd {}; make pull".format(dirname))
 
-    def load_stage(self, name):
-        for dirname in self.info['images']:
-            dirpath = os.path.join(dirname,name)
-            dockerfile_path = os.path.join(dirpath, "Dockerfile")
-            run_path = os.path.join(dirpath, "run.py")
-            if os.path.isdir(dirpath) and os.path.isfile(dockerfile_path) and os.path.isfile(run_path):
-                path = run_path
-                break
-        else:
-            raise PipelineError("""No Stage called {} was found - needs to be in one
-                of the images directories and contain Dockerfile, run.py""".format(name))
-
-        # We want to load a module based on a python.  The python people keep changing how to do this in obscure
-        # ways.  This one is deprecated but works back in python 3.4 which is what centos 7 can provide.
+    def _load_path(self, name, path):
+        # We want to load a module based on a python file path.  
+        # The python people keep changing how to do this in obscure
+        # ways.  This one is deprecated but works back in python 3.4
+        # which is what centos 7 can provide.
         loader = importlib.machinery.SourceFileLoader(name, path)
         module = loader.load_module()
-        return module.Stage
+        stage = module.Stage
+        return stage        
+
+    def load_github(self, name):
+        info = self.cfg[name]
+        repo = info['github']
+        branch = info.get("checkout", "master")
+        with tempfile.TemporaryDirectory() as dirname:
+            clone = "git clone --branch {branch} https://github.com/{repo} {dirname}/{repo}".format(
+                repo=repo, branch=branch, dirname=dirname)
+            status = os.system(clone)
+            if status:
+                raise PipelineError("Could not clone repo using command: {}".format(clone))
+            docker_dir = os.path.join(dirname, repo, "pipeline", "docker")
+            path = os.path.join(docker_dir, "run.py")
+            stage = self._load_path(name, path)
+
+            print("Building remote pipeline element {}".format(name))
+            image = self.image_name(name)
+            cmd = "cd {} && docker build -t {} .".format(docker_dir, image)
+            status = os.system(cmd)
+            if status:
+                raise PipelineError("Could not build image: {}".format(name))
+
+
+        return stage
+
+
+
+    def load_stage(self, name):
+        if 'github' in self.cfg[name]:
+            stage = self.load_github(name)
+        else:
+            for dirname in self.info['images']:
+                dirpath = os.path.join(dirname,name)
+                dockerfile_path = os.path.join(dirpath, "Dockerfile")
+                run_path = os.path.join(dirpath, "run.py")
+                if os.path.isdir(dirpath) and os.path.isfile(dockerfile_path) and os.path.isfile(run_path):
+                    path = run_path
+                    break
+            else:
+                raise PipelineError("""No Stage called {} was found - needs to be in one
+                    of the images directories and contain Dockerfile, run.py""".format(name))
+
+            stage = self._load_path(name, path)
+        return stage
 
 
     def input_tags(self):
@@ -83,6 +119,39 @@ class Pipeline:
         info = yaml.load(input_file)
         return info
 
+    def parallelism(self, stage_name):
+        info = self.cfg['stage_name']
+        if 'nodes' in info:
+            ppn = info['ppn']
+            nodes = info['nodes']
+        # Serial job
+        else:
+            nodes = 0
+            ppn = 1
+        return  nodes, ppn
+
+    def docker_command(self, stage_name, flags):
+        flags = flags[:]
+        info = self.cfg[stage_name]
+
+        openmp = info.get('openmp')
+        if openmp:
+            flags.append('--env OMP_NUM_THREADS={}'.format(openmp))
+        
+        nodes = info.get('nodes')
+        if nodes:
+            ppn = info['ppn']
+            cores = ppn * nodes
+            runner = 'mpirun -n {} '.format(cores)
+        else:
+            runner = ""
+
+
+        flags = '  '.join(flags)
+        image = self.image_name(stage_name)
+        cmd = "{}docker run --rm -it {} {} /opt/desc/run.py".format(runner, flags, image)
+
+        return cmd
 
 
     def image_name(self, name):
@@ -98,3 +167,4 @@ class Pipeline:
 
     def dependencies(self, name):
         return self.dag.predecessors(name)
+

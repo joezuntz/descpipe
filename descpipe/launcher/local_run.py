@@ -76,8 +76,9 @@ class LocalLauncher(Launcher):
         output_mount = "-v {}:/opt/output".format(os.path.abspath(output_dir))
         config_mount = "-v {}:/opt/config".format(os.path.abspath(config_dir))
 
-        cmd = "docker run --rm -it {} {} {} {} /opt/desc/run.py".format(
-            input_mount, output_mount, config_mount, image)
+        flags = [input_mount, output_mount, config_mount]
+
+        cmd = self.pipeline.docker_command(stage_name, flags)
 
         print("Running container:")
         print(cmd)
